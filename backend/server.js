@@ -20,6 +20,9 @@ app.get("/", (req, res) => {
     res.send("SkillSwap API is running...");
 });
 
+// Routes
+app.use("/api/auth", require("./routes/authRoutes"));
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
