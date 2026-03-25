@@ -1,9 +1,115 @@
-import React from 'react';
+import React, { useState, useContext } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import AuthContext from '../context/AuthContext';
 
 const Register = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: 'student'
+  });
+  const [error, setError] = useState('');
+  
+  const { register } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const { name, email, password, role } = formData;
+
+  const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await register(formData);
+      navigate('/login');
+    } catch (err) {
+      setError(err.response?.data?.msg || 'Registration failed. Please try again.');
+    }
+  };
+
   return (
-    <div>
-      <h1>Register</h1>
+    <div style={{ 
+      flex: 1, 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      padding: '20px'
+    }}>
+      <div className="auth-card">
+        <h2 style={{ fontSize: '1.8rem', marginBottom: '8px', textAlign: 'center' }}>Create Account</h2>
+        <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginBottom: '32px' }}>
+          Join SkillSwap and start sharing your expertise
+        </p>
+
+        {error && (
+          <div style={{ 
+            background: 'rgba(239, 68, 68, 0.1)', 
+            color: '#ef4444', 
+            padding: '12px', 
+            borderRadius: '8px', 
+            fontSize: '0.9rem',
+            marginBottom: '20px',
+            border: '1px solid rgba(239, 68, 68, 0.2)'
+          }}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label>Full Name</label>
+            <input 
+              type="text" 
+              name="name"
+              placeholder="John Doe"
+              value={name} 
+              onChange={onChange} 
+              required 
+            />
+          </div>
+          <div className="input-group">
+            <label>Email Address</label>
+            <input 
+              type="email" 
+              name="email"
+              placeholder="name@example.com"
+              value={email} 
+              onChange={onChange} 
+              required 
+            />
+          </div>
+          <div className="input-group">
+            <label>Password</label>
+            <input 
+              type="password" 
+              name="password"
+              placeholder="••••••••"
+              value={password} 
+              onChange={onChange} 
+              required 
+            />
+          </div>
+          <div className="input-group">
+            <label>I want to be a</label>
+            <select 
+              name="role"
+              value={role} 
+              onChange={onChange}
+            >
+              <option value="student">Student (Learning)</option>
+              <option value="mentor">Mentor (Teaching)</option>
+            </select>
+          </div>
+          <button type="submit" className="btn-primary" style={{ marginTop: '10px' }}>
+            Create Account
+          </button>
+        </form>
+
+        <p style={{ marginTop: '24px', textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+          Already have an account? <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 600 }}>Sign In</Link>
+        </p>
+      </div>
     </div>
   );
 };
