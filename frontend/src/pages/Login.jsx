@@ -1,10 +1,12 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import AuthContext from '../context/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   
   const { login } = useContext(AuthContext);
@@ -61,13 +63,33 @@ const Login = () => {
           </div>
           <div className="input-group">
             <label>Password</label>
-            <input 
-              type="password" 
-              placeholder="••••••••"
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
-            />
+            <div style={{ position: 'relative' }}>
+              <input 
+                type={showPassword ? 'text' : 'password'} 
+                placeholder="••••••••"
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                required 
+                style={{ paddingRight: '45px' }}
+              />
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ 
+                  position: 'absolute', 
+                  right: '12px', 
+                  top: '50%', 
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  color: 'var(--text-muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '4px'
+                }}
+              >
+                {showPassword ? <FaEye size={18} /> : <FaEyeSlash size={18} />}
+              </button>
+            </div>
           </div>
           <button type="submit" className="btn-primary" style={{ marginTop: '10px' }}>
             Sign In
