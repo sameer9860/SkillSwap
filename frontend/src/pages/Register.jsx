@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import AuthContext from '../context/AuthContext';
 
 const Register = () => {
@@ -9,6 +10,7 @@ const Register = () => {
     password: '',
     role: 'student'
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   
   const { register } = useContext(AuthContext);
@@ -81,14 +83,34 @@ const Register = () => {
           </div>
           <div className="input-group">
             <label>Password</label>
-            <input 
-              type="password" 
-              name="password"
-              placeholder="••••••••"
-              value={password} 
-              onChange={onChange} 
-              required 
-            />
+            <div style={{ position: 'relative' }}>
+              <input 
+                type={showPassword ? 'text' : 'password'} 
+                name="password"
+                placeholder="••••••••"
+                value={password} 
+                onChange={onChange} 
+                required 
+                style={{ paddingRight: '45px' }}
+              />
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ 
+                  position: 'absolute', 
+                  right: '12px', 
+                  top: '50%', 
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  color: 'var(--text-muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '4px'
+                }}
+              >
+                {showPassword ? <FaEye size={18} /> : <FaEyeSlash size={18} />}
+              </button>
+            </div>
           </div>
           <div className="input-group">
             <label>I want to be a</label>
