@@ -20,6 +20,7 @@ The project is being developed in structured phases. Currently, the **Backend Fo
   - **Skill Model**: Categorized skill listings with pricing and duration.
   - **Booking Model**: Appointment management system for skill swaps.
   - Verified models with automated loading scripts.
+  
 
 ---
 
