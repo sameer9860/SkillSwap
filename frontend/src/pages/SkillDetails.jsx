@@ -1,13 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import AuthContext from '../context/AuthContext';
 
 const SkillDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+  
   const [skill, setSkill] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const [date, setDate] = useState('');
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState('');
+  const [bookingError, setBookingError] = useState('');
 
   useEffect(() => {
     const fetchSkillDetails = async () => {
@@ -23,6 +31,27 @@ const SkillDetails = () => {
 
     fetchSkillDetails();
   }, [id]);
+
+  const handleBooking = async () => {
+    if (!date) {
+      setBookingError('Please select a date for the session.');
+      return;
+    }
+    
+    setBookingError('');
+    setBookingSuccess('');
+    setBookingLoading(true);
+
+    try {
+      await api.post('/bookings', { skillId: id, date });
+      setBookingSuccess('Session booked successfully!');
+      setDate('');
+    } catch (err) {
+      setBookingError(err.response?.data?.msg || 'Failed to book session. Please try again.');
+    } finally {
+      setBookingLoading(false);
+    }
+  };
 
   if (loading) {
     return <div className="container" style={{ padding: '60px 20px', textAlign: 'center' }}>Loading skill details...</div>;
@@ -75,14 +104,48 @@ const SkillDetails = () => {
           <p style={{ color: 'var(--text-muted)', lineHeight: '1.6' }}>{skill.description}</p>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--glass-border)', paddingTop: '24px' }}>
           <div>
             <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>Mentored by</p>
             <p style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>{skill.mentor?.name || 'Unknown Mentor'}</p>
           </div>
-          <button className="btn-primary" style={{ padding: '12px 32px' }}>
-            Book Session
-          </button>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+            {user?.role === 'student' ? (
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <input 
+                  type="date" 
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  style={{ 
+                    padding: '10px 16px', 
+                    borderRadius: '8px', 
+                    border: '1px solid var(--border-color)',
+                    background: 'rgba(15, 23, 42, 0.5)',
+                    color: 'var(--text-main)',
+                    outline: 'none',
+                    colorScheme: 'dark'
+                  }} 
+                />
+                <button 
+                  className="btn-primary" 
+                  style={{ padding: '12px 32px', opacity: bookingLoading ? 0.7 : 1, cursor: bookingLoading ? 'not-allowed' : 'pointer' }}
+                  onClick={handleBooking}
+                  disabled={bookingLoading}
+                >
+                  {bookingLoading ? 'Booking...' : 'Book Session'}
+                </button>
+              </div>
+            ) : !user ? (
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Log in as a student to book this session.</p>
+            ) : (
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Only students can book sessions.</p>
+            )}
+            
+            {bookingError && <p style={{ color: '#ef4444', fontSize: '0.85rem', margin: 0 }}>{bookingError}</p>}
+            {bookingSuccess && <p style={{ color: '#10b981', fontSize: '0.85rem', margin: 0 }}>{bookingSuccess}</p>}
+          </div>
         </div>
       </div>
     </div>
