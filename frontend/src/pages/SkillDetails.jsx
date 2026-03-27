@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import api from '../services/api';
 import AuthContext from '../context/AuthContext';
 
@@ -14,8 +15,6 @@ const SkillDetails = () => {
   
   const [date, setDate] = useState('');
   const [bookingLoading, setBookingLoading] = useState(false);
-  const [bookingSuccess, setBookingSuccess] = useState('');
-  const [bookingError, setBookingError] = useState('');
 
   useEffect(() => {
     const fetchSkillDetails = async () => {
@@ -34,20 +33,18 @@ const SkillDetails = () => {
 
   const handleBooking = async () => {
     if (!date) {
-      setBookingError('Please select a date for the session.');
+      toast.error('Please select a date for the session.');
       return;
     }
     
-    setBookingError('');
-    setBookingSuccess('');
     setBookingLoading(true);
 
     try {
       await api.post('/bookings', { skillId: id, date });
-      setBookingSuccess('Session booked successfully!');
+      toast.success('Session booked successfully!');
       setDate('');
     } catch (err) {
-      setBookingError(err.response?.data?.msg || 'Failed to book session. Please try again.');
+      toast.error(err.response?.data?.msg || 'Failed to book session. Please try again.');
     } finally {
       setBookingLoading(false);
     }
@@ -142,9 +139,6 @@ const SkillDetails = () => {
             ) : (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Only students can book sessions.</p>
             )}
-            
-            {bookingError && <p style={{ color: '#ef4444', fontSize: '0.85rem', margin: 0 }}>{bookingError}</p>}
-            {bookingSuccess && <p style={{ color: '#10b981', fontSize: '0.85rem', margin: 0 }}>{bookingSuccess}</p>}
           </div>
         </div>
       </div>
