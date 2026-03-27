@@ -8,15 +8,28 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    const bootstrap = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      // In a real app, you might fetch user profile here
-      // For now, we'll just set a placeholder or decode the JWT if needed
-      // Assuming a simple structure for now
-      setUser({ token }); 
-    }
-    setLoading(false);
+
+      try {
+        const res = await api.get("/auth/me");
+        setUser(res.data);
+      } catch (e) {
+        localStorage.removeItem("token");
+        delete api.defaults.headers.common["Authorization"];
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    bootstrap();
   }, []);
 
   const login = async (email, password) => {
@@ -24,7 +37,12 @@ export const AuthProvider = ({ children }) => {
     const { token } = res.data;
     localStorage.setItem("token", token);
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    setUser({ token });
+    setUser({
+      _id: res.data._id,
+      name: res.data.name,
+      email: res.data.email,
+      role: res.data.role,
+    });
     return res.data;
   };
 
