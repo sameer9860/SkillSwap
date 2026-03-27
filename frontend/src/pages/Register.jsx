@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 import AuthContext from '../context/AuthContext';
 
 const Register = () => {
@@ -11,7 +12,6 @@ const Register = () => {
     role: 'student'
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
   
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ const Register = () => {
       await register(formData);
       navigate('/login');
     } catch (err) {
-      setError(err.response?.data?.msg || 'Registration failed. Please try again.');
+      toast.error(err.response?.data?.msg || 'Registration failed. Please try again.');
     }
   };
 
@@ -43,20 +43,6 @@ const Register = () => {
         <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginBottom: '32px' }}>
           Join SkillSwap and start sharing your expertise
         </p>
-
-        {error && (
-          <div style={{ 
-            background: 'rgba(239, 68, 68, 0.1)', 
-            color: '#ef4444', 
-            padding: '12px', 
-            borderRadius: '8px', 
-            fontSize: '0.9rem',
-            marginBottom: '20px',
-            border: '1px solid rgba(239, 68, 68, 0.2)'
-          }}>
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit}>
           <div className="input-group">
