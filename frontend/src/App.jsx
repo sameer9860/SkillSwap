@@ -9,6 +9,8 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import SkillDetails from './pages/SkillDetails';
 import PrivateRoute from './routes/PrivateRoute';
+import Profile from './pages/Profile';
+import CreateSkill from './pages/CreateSkill';
 
 function App() {
   return (
@@ -26,6 +28,22 @@ function App() {
               <Dashboard />
             </PrivateRoute>
           } 
+        />
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <Profile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/skills/new"
+          element={
+            <PrivateRoute>
+              <CreateSkill />
+            </PrivateRoute>
+          }
         />
         <Route path="/skills/:id" element={<SkillDetails />} />
       </Routes>
