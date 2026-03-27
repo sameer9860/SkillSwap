@@ -8,7 +8,7 @@ const Navbar = () => {
   if (!user) return null;
 
   return (
-    <nav className="glass" style={{ postion: 'sticky', top: 0, zIndex: 1000 }}>
+    <nav className="glass" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>
       <div className="container" style={{ 
         height: '70px', 
         display: 'flex', 
@@ -23,6 +23,12 @@ const Navbar = () => {
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <Link to="/dashboard" style={{ fontWeight: 500, color: 'var(--text-muted)' }}>Dashboard</Link>
+          <Link to="/profile" style={{ fontWeight: 500, color: 'var(--text-muted)' }}>Profile</Link>
+          {user?.role === 'mentor' && (
+            <Link to="/skills/new" className="btn-outline" style={{ borderRadius: '8px', fontSize: '0.9rem' }}>
+              Create Skill
+            </Link>
+          )}
           <button 
             onClick={logout} 
             className="btn-outline" 
