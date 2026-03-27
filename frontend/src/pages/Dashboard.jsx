@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
 import AuthContext from '../context/AuthContext';
 import SkillCard from '../components/SkillCard';
@@ -27,14 +28,28 @@ const Dashboard = () => {
     fetchSkills();
   }, []);
 
-  const categories = [...new Set(skills.map(skill => skill.category))];
+  const isMentor = user?.role === 'mentor';
 
-  const filteredSkills = skills.filter(skill => {
-    const matchesSearch = skill.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          skill.mentor?.name?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory ? skill.category === selectedCategory : true;
-    return matchesSearch && matchesCategory;
-  });
+  const baseSkills = useMemo(() => {
+    if (!isMentor) return skills;
+    return skills.filter((skill) => String(skill.mentor?._id) === String(user?._id));
+  }, [isMentor, skills, user?._id]);
+
+  const categories = useMemo(() => {
+    return [...new Set(baseSkills.map((skill) => skill.category).filter(Boolean))];
+  }, [baseSkills]);
+
+  const filteredSkills = useMemo(() => {
+    return baseSkills.filter((skill) => {
+      const q = searchQuery.trim().toLowerCase();
+      const matchesSearch =
+        !q ||
+        skill.title?.toLowerCase().includes(q) ||
+        skill.mentor?.name?.toLowerCase().includes(q);
+      const matchesCategory = selectedCategory ? skill.category === selectedCategory : true;
+      return matchesSearch && matchesCategory;
+    });
+  }, [baseSkills, searchQuery, selectedCategory]);
 
   return (
     <div className="container" style={{ padding: '40px 20px', flex: 1 }}>
@@ -43,7 +58,7 @@ const Dashboard = () => {
           Welcome back, <span style={{ color: 'var(--primary)' }}>{user?.name?.split(' ')[0]}</span>!
         </h2>
         <p style={{ color: 'var(--text-muted)' }}>
-          Explore available skills and start learning today.
+          {isMentor ? 'Manage your hosted skills and sessions.' : 'Explore available skills and start learning today.'}
         </p>
       </div>
 
@@ -55,12 +70,21 @@ const Dashboard = () => {
         flexWrap: 'wrap',
         gap: '16px'
       }}>
-        <h3 style={{ fontSize: '1.5rem', margin: 0 }}>Available Skills</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <h3 style={{ fontSize: '1.5rem', margin: 0 }}>
+            {isMentor ? 'My Hosted Skills' : 'Available Skills'}
+          </h3>
+          {isMentor && (
+            <Link to="/skills/new" className="btn-primary" style={{ padding: '10px 14px', borderRadius: '10px' }}>
+              Add New Skill
+            </Link>
+          )}
+        </div>
         
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           <input 
             type="text" 
-            placeholder="Search skills or mentors..." 
+            placeholder={isMentor ? 'Search my skills...' : 'Search skills or mentors...'} 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{ 
@@ -110,7 +134,14 @@ const Dashboard = () => {
         </div>
       ) : filteredSkills.length === 0 ? (
         <div className="glass" style={{ textAlign: 'center', padding: '60px', borderRadius: 'var(--radius)' }}>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>No skills match your search criteria.</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>
+            {isMentor ? 'You have not hosted any skills yet.' : 'No skills match your search criteria.'}
+          </p>
+          {isMentor && (
+            <div style={{ marginTop: '16px' }}>
+              <Link to="/skills/new" className="btn-primary">Create your first skill</Link>
+            </div>
+          )}
         </div>
       ) : (
         <div style={{ 
