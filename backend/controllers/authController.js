@@ -67,6 +67,23 @@ const login = async (req, res) => {
   }
 };
 
+// @desc Get current user
+// @route GET /api/auth/me
+// @access Private
+const me = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ msg: "Not authorized" });
+  }
+
+  return res.json({
+    _id: req.user._id,
+    name: req.user.name,
+    email: req.user.email,
+    role: req.user.role,
+    bio: req.user.bio,
+  });
+};
+
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, {
     expiresIn: "30d",
@@ -76,4 +93,5 @@ const generateToken = (id, role) => {
 module.exports = {
   register,
   login,
+  me,
 };
