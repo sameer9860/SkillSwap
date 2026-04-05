@@ -22,13 +22,33 @@ const createSkill = async (req, res) => {
   }
 };
 
-// @desc Get all skills
+// @desc Get all skills (search, filter, pagination)
 // @route GET /api/skills
 // @access Public
 const getSkills = async (req, res) => {
   try {
-    const skills = await Skill.find().populate("mentor", "name email");
-    res.json(skills);
+    const pageSize = Number(req.query.limit) || 10;
+    const page = Number(req.query.page) || 1;
+
+    const keyword = req.query.keyword
+      ? {
+          $or: [
+            { title: { $regex: req.query.keyword, $options: "i" } },
+            { description: { $regex: req.query.keyword, $options: "i" } },
+          ],
+        }
+      : {};
+
+    const category = req.query.category ? { category: req.query.category } : {};
+
+    const count = await Skill.countDocuments({ ...keyword, ...category });
+    const skills = await Skill.find({ ...keyword, ...category })
+      .populate("mentor", "name email")
+      .limit(pageSize)
+      .skip(pageSize * (page - 1))
+      .sort({ createdAt: -1 });
+
+    res.json({ skills, page, pages: Math.ceil(count / pageSize), total: count });
   } catch (error) {
     res.status(500).json({ msg: "Server error", error: error.message });
   }
